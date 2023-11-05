@@ -8,6 +8,8 @@ from sklearn.model_selection import train_test_split
 from utilities import *
 from strategies import *
 
+import tqdm
+
 # Parse the command-line arguments
 parser = argparse.ArgumentParser(description='Visualize data including SMA for a given symbol.')
 parser.add_argument('symbol', type=str, help='The symbol to analyze (e.g., USDZAR)')
@@ -79,7 +81,7 @@ if len(combined_df) > 0:
 
         # Determine trade success
         combined_df['TradeSuccess'] = 0
-        for i in range(len(combined_df)):
+        for i in tqdm(range(len(combined_df)), desc="Evaluating Trade Success Rate..."):
             if combined_df['Position'][i] == 0:
                 continue
             if combined_df['Position'][i] == 1:

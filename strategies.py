@@ -5,6 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from utilities import *
 
+from tqdm import tqdm
+
 def train_pattern_recognition_model(features, labels):
     # Split data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
@@ -69,8 +71,8 @@ def generate_signals(df):
     take_profits = []
     stop_losses = []
     in_position = False
-
-    for i in range(len(df)):
+    
+    for i in tqdm(range(len(df)), desc="Processing Signals..."):
         if i < 55:
             signals.append(0)
             entry_prices.append(0)
@@ -142,7 +144,7 @@ def generate_signals(df):
     df['FilteredSignal'] = 0  # Initialize a new column for filtered signals
     filter_window = 5  # Adjust the filter window to your preference
 
-    for i in range(len(df)):
+    for i in tqdm(range(len(df)), desc="Filtering Signals..."):
         if i >= filter_window:
             if all(df['Signal'][i - filter_window + 1:i + 1] == 1):
                 df.iloc[i, df.columns.get_loc('FilteredSignal')] = 1
@@ -175,7 +177,7 @@ def optimize_strategy(data):
     # Use optimization techniques to find the best parameter combination
     # For example, optimize the short and long moving average windows
     
-    for i in range(len(data)):
+    for i in tqdm(range(len(data)), desc="Isolating Faulse Signals..."):
         if data['Signal'][i] == 1:
             if data['TakeProfit'][i] < data['Entry'][i]:
                 data['Signal'][i] = 0
