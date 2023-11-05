@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from utilities import *
 from strategies import *
 
-import tqdm
+from tqdm import tqdm
 
 # Parse the command-line arguments
 parser = argparse.ArgumentParser(description='Visualize data including SMA for a given symbol.')
