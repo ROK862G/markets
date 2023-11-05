@@ -85,48 +85,48 @@ def generate_signals(df):
         ema_21 = df['Close'].rolling(window=21).mean()
         ema_55 = df['Close'].rolling(window=55).mean()
 
-        if not in_position and ema_55[i] < ema_13[i] and ema_55[i] < ema_21[i] and ema_55[i] < ema_8[i]:
+        if not in_position and ema_55.iloc[i] < ema_13.iloc[i] and ema_55.iloc[i] < ema_21.iloc[i] and ema_55.iloc[i] < ema_8.iloc[i]:
             # Buy Signal
             signals.append(1)
-            entry_prices.append(df['Low'][i])
+            entry_prices.append(df['Low'].iloc[i])
             has_target = False
             for n in range(len(df)):
                 if n <= i:
                     continue
                 # Find the take profit and stop loss
-                if ema_55[n] > ema_13[n] and ema_55[n] > ema_21[n] and ema_55[i] > ema_8[i]:
-                    take_profits.append(df['Low'][n])
-                    take_profit = df['Low'][n]
+                if ema_55.iloc[n] > ema_13.iloc[n] and ema_55.iloc[n] > ema_21.iloc[n] and ema_55.iloc[n] > ema_8.iloc[n]:
+                    take_profits.append(df['Low'].iloc[n])
+                    take_profit = df['Low'].iloc[n]
                     has_target = True
                     break
             
             if not has_target:
-                stop_losses.append(df['High'][i])
-                take_profits.append(df['Low'][i])
+                stop_losses.append(df['High'].iloc[i])
+                take_profits.append(df['Low'].iloc[i])
             else:
-                stop_losses.append(df['Low'][i] - ((df['Low'][i] - take_profit) / 2))
+                stop_losses.append(df['Low'].iloc[i] - ((df['Low'].iloc[i] - take_profit) / 2))
             in_position = True
-        elif in_position and ema_55[i] > ema_13[i] and ema_55[i] > ema_21[i] and ema_55[i] > ema_8[i]:
+        elif in_position and ema_55.iloc[i] > ema_13.iloc[i] and ema_55.iloc[i] > ema_21.iloc[i] and ema_55.iloc[i] > ema_8.iloc[i]:
             # Sell Signal
             signals.append(-1)
-            entry_prices.append(df['High'][i])
+            entry_prices.append(df['High'].iloc[i])
             take_profit = 0
             has_target = False
             for n in range(len(df)):
                 if n <= i:
                     continue
                 # Find the take profit and stop loss
-                if ema_55[n] < ema_13[n] and ema_55[n] < ema_21[n] and ema_55[i] < ema_8[i]:
-                    take_profits.append(df['High'][n])
-                    take_profit = df['High'][n]
+                if ema_55.iloc[n] < ema_13.iloc[n] and ema_55.iloc[n] < ema_21.iloc[n] and ema_55.iloc[n] < ema_8.iloc[n]:
+                    take_profits.append(df['High'].iloc[n])
+                    take_profit = df['High'].iloc[n]
                     has_target = True
                     break
             
             if not has_target:
-                stop_losses.append(df['Low'][i])
-                take_profits.append(df['High'][i])
+                stop_losses.append(df['Low'].iloc[i])
+                take_profits.append(df['High'].iloc[i])
             else:
-                stop_losses.append(df['High'][i] + ((df['High'][i] - take_profit) / 2))
+                stop_losses.append(df['High'].iloc[i] + ((df['High'].iloc[i] - take_profit) / 2))
                 
             in_position = False
         else:
@@ -178,12 +178,12 @@ def optimize_strategy(data):
     # For example, optimize the short and long moving average windows
     
     for i in tqdm(range(len(data)), desc="Isolating Faulse Signals..."):
-        if data['Signal'][i] == 1:
-            if data['TakeProfit'][i] < data['Entry'][i]:
-                data['Signal'][i] = 0
-        if data['Signal'][i] == -1:
-            if data['TakeProfit'][i] > data['Entry'][i]:
-                data['Signal'][i] = 0
+        if data['Signal'].iloc[i] == 1:
+            if data['TakeProfit'].iloc[i] < data['Entry'].iloc[i]:
+                data['Signal'].iloc[i] = 0
+        if data['Signal'].iloc[i] == -1:
+            if data['TakeProfit'].iloc[i] > data['Entry'].iloc[i]:
+                data['Signal'].iloc[i] = 0
                 
     return data
 
