@@ -177,13 +177,13 @@ def optimize_strategy(data):
     # Use optimization techniques to find the best parameter combination
     # For example, optimize the short and long moving average windows
     
-    for i in tqdm(range(len(data)), desc="Isolating Faulse Signals..."):
+    for i in tqdm(range(len(data)), desc="Isolating False Signals..."):
         if data['Signal'].iloc[i] == 1:
             if data['TakeProfit'].iloc[i] < data['Entry'].iloc[i]:
-                data['Signal'].iloc[i] = 0
+                data.loc[i, 'Signal'] = 0
         if data['Signal'].iloc[i] == -1:
             if data['TakeProfit'].iloc[i] > data['Entry'].iloc[i]:
-                data['Signal'].iloc[i] = 0
+                data.loc[i, 'Signal'] = 0
                 
     return data
 
