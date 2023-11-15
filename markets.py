@@ -4,8 +4,8 @@ import alpaca_trade_api as tradeapi
 
 def execute_market_order(symbol='EURUSD', trade_units=10000, take_profit=None, stop_loss=None, side='buy'):
     # Replace with your Alpaca API credentials
-    api_key_id = 'PKIIBZIVDEA4IZ36Q308'
-    api_secret_key = 'hDdbbuyDjpjv1re6L0HcG2Dej9OXi1md7wlh9uex'
+    api_key_id = 'XXX'
+    api_secret_key = 'XXX'
     
     # symbol = symbol[:3] + '/' + symbol[3:]
 
