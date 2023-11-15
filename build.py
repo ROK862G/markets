@@ -43,13 +43,8 @@ except Exception as ex:
 
 # If there is sufficient data, perform the analysis and trading strategy
 if len(combined_df) > 0:
-    # df['Signal'] = signals
-    # df['Entry'] = [entry_price if signal == 1 else None for signal in signals]
-    # df['TakeProfit'] = [take_profit if signal == -1 else None for signal in signals]
-    # df['StopLoss'] = [stop_loss if signal == -1 else None for signal in signals]
-    # df['TradeSuccessful'] = success_rates
     # Prepare input data for machine learning    
-    features = combined_df[['EMA8', 'EMA13', 'EMA21', 'EMA55', 'BollingerUpper', 'BollingerUpper', 'FilteredSignal', 'CombinedSignal', 'High', 'Low', 'Entry' ]].dropna()  # Features
+    features = combined_df[['EMA8', 'EMA13', 'EMA21', 'EMA55', 'BollingerUpper', 'BollingerLower', 'FilteredSignal', 'CombinedSignal', 'High', 'Low', 'Entry', 'TakeProfit', 'StopLoss', 'Open', 'Close' ]].dropna()  # Features
     labels = combined_df['Signal'].loc[features.index]  # Labels
 
     # Split data into training and testing sets
@@ -62,6 +57,16 @@ if len(combined_df) > 0:
             print(f"Model accuracy: {accuracy * 100}%")
             
             save_model(model, symbol)
+        
+        else:
+            # Get the number of trees (estimators)
+            num_estimators = model.n_estimators
+
+            # Get the maximum depth of the trees
+            max_tree_depth = model.max_depth
+
+            print("Number of trees (estimators):", num_estimators)
+            print("Maximum tree depth:", max_tree_depth)
 
         # Make predictions on the testing set
         y_pred = model.predict(X_test)
@@ -79,21 +84,21 @@ if len(combined_df) > 0:
         combined_df['Strategy_Returns'] = combined_df['Position'].shift(1) * combined_df['Returns']
         combined_df['Cumulative_Strategy_Returns'] = combined_df['Strategy_Returns'].cumsum()
 
-        # Determine trade success
         combined_df['TradeSuccess'] = 0
         for i in tqdm(range(len(combined_df)), desc="Evaluating Trade Success Rate..."):
-            if combined_df['Position'][i] == 0:
+            if combined_df['Position'].iloc[i] == 0:
                 continue
-            if combined_df['Position'][i] == 1:
-                if combined_df['Close'][i] >= combined_df['TakeProfit'][i]:
-                    combined_df['TradeSuccess'][i] = 1  # Trade was successful
-                elif combined_df['Close'][i] <= combined_df['StopLoss'][i]:
-                    combined_df['TradeSuccess'][i] = -1  # Trade was not successful
-            elif combined_df['Position'][i] == -1:
-                if combined_df['Close'][i] <= combined_df['TakeProfit'][i]:
-                    combined_df['TradeSuccess'][i] = 1  # Trade was successful
-                elif combined_df['Close'][i] >= combined_df['StopLoss'][i]:
-                    combined_df['TradeSuccess'][i] = -1  # Trade was not successful
+            if combined_df['Position'].iloc[i] == 1:
+                if combined_df['Close'].iloc[i] >= combined_df['TakeProfit'].iloc[i]:
+                    combined_df.loc[i, 'TradeSuccess'] = 1  # Trade was successful
+                elif combined_df['Close'].iloc[i] <= combined_df['StopLoss'].iloc[i]:
+                    combined_df.loc[i, 'TradeSuccess'] = -1  # Trade was not successful
+            elif combined_df['Position'].iloc[i] == -1:
+                if combined_df['Close'].iloc[i] <= combined_df['TakeProfit'].iloc[i]:
+                    combined_df.loc[i, 'TradeSuccess'] = 1  # Trade was successful
+                elif combined_df['Close'].iloc[i] >= combined_df['StopLoss'].iloc[i]:
+                    combined_df.loc[i, 'TradeSuccess'] = -1  # Trade was not successful
+
 
         # Evaluate performance
         total_returns = combined_df['Cumulative_Returns'].iloc[-1]
@@ -103,6 +108,12 @@ if len(combined_df) > 0:
         successful_trades = len(combined_df[combined_df['TradeSuccess'] == 1])
         success_rate = (successful_trades / total_trades) * 100
 
+        # Check if there is enough data to calculate strategy_returns_percent
+        if combined_df['Cumulative_Returns'].iloc[0] != 0:
+            strategy_returns_percent = (strategy_returns / combined_df['Cumulative_Returns'].iloc[0]) * 100
+        else:
+            strategy_returns_percent = 0
+
 
         print(f"Total Returns: {total_returns:.2f}")
         print(f"Strategy Returns: {strategy_returns:.2f}")
@@ -110,7 +121,8 @@ if len(combined_df) > 0:
 
         # Visualize the results, backtest, and evaluate performance
         # (You can use libraries like Matplotlib and Pandas for this)
-
+        
+        
         # Visualize the results
         plt.figure(figsize=(12, 6))
         plt.plot(combined_df.index, combined_df['Close'], label='Close Price', color='black')
@@ -126,7 +138,7 @@ if len(combined_df) > 0:
 
         # # Plot the strategy returns
         plt.figure(figsize=(12, 6))
-        plt.plot(combined_df.index, combined_df['Cumulative_Returns'], label='Buy and Hold', color='black')
+        plt.plot(combined_df.index, combined_df['Cumulative_Returns'], label='Earnings', color='green')
         plt.plot(combined_df.index, combined_df['Cumulative_Strategy_Returns'], label='Strategy', color='blue')
         plt.legend(loc='upper left')
         plt.title('Cumulative Returns')

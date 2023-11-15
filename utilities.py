@@ -111,7 +111,7 @@ def get_historical(symbol, date):
 
     return None, False
 
-def load_from_corpus(count, symbol):
+def load_from_corpus(count, symbol, prediction=False):
     """Loop through CSV files in the "corpus" folder and compile data into an array"""
     data_array = []
     corpus_folder = "corpus"
@@ -128,8 +128,12 @@ def load_from_corpus(count, symbol):
             # Append the data to the array
             data_array.append(df)
             counter += 1
-    
-    return data_array
+            
+            
+    if prediction:
+        return data_array[-1]
+    else: 
+        return data_array
 
 def calculate_sma(data, window):
     """Function to calculate SMA for a given DataFrame and window size"""
